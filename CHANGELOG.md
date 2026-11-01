@@ -2,6 +2,11 @@
 
 All notable changes to this project are documented in this file.
 
+## 0.6.11 — 2026-11-01
+
+- Fix Account & Usage for Remote SSH and Dev Containers by running Codex Ext
+  in VS Code's local UI extension host, alongside the official Codex account.
+
 ## 0.6.10 — 2026-11-01
 
 - Updated the Marketplace description and README to reflect the current

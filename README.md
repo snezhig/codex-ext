@@ -43,6 +43,13 @@ code --install-extension wzrzt.codex-ext
 - [OpenAI Codex](https://marketplace.visualstudio.com/items?itemName=openai.chatgpt)
   (`openai.chatgpt`)
 
+### Remote SSH / Dev Containers
+
+Codex Ext intentionally runs on the **local VS Code UI host**, including when
+the folder is opened through Remote SSH or a Dev Container. This lets Account
+& Usage use the same local Codex sign-in and allowance as the official Codex
+extension, instead of looking for credentials on the remote machine.
+
 The extension opens sessions in the leftmost existing editor group through the
 official Codex conversation editor.
 
@@ -140,6 +147,12 @@ Codex Ext 是一个独立的 VS Code 扩展，用来管理本机的 OpenAI Codex
 ```bash
 code --install-extension wzrzt.codex-ext
 ```
+
+### Remote SSH / Dev Container
+
+即使通过 Remote SSH 或 Dev Container 打开项目，Codex Ext 也会运行在本机
+VS Code 的 UI 端，与官方 Codex 扩展使用同一份本机登录态和用量数据；不会在
+远端服务器上查找账户信息。
 
 - 按当前工作区或全部本地会话筛选；已归档会话也遵循该范围。
 - 显示官方 Codex 本地 app-server 返回的账户、套餐与可用额度。
