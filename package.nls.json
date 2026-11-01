@@ -1,6 +1,6 @@
 {
   "displayName": "Codex Ext",
-  "description": "Manage local Codex sessions by VS Code workspace.",
+  "description": "Workspace-aware Codex session manager with usage, search, groups, and archive.",
   "activitybar.title": "Codex Ext",
   "view.title": "\u200b",
   "usage.view.title": "Account & Usage",

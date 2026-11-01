@@ -1,6 +1,6 @@
 {
   "displayName": "Codex Ext",
-  "description": "按 VS Code 工作区管理本地 Codex 会话。",
+  "description": "按工作区管理 Codex 会话，支持用量、搜索、分组和归档。",
   "activitybar.title": "Codex Ext",
   "view.title": "\u200b",
   "usage.view.title": "账户与用量",

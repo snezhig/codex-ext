@@ -1,11 +1,27 @@
 # Codex Ext
 
-`Codex Ext` is an independent VS Code extension for managing local OpenAI
-Codex sessions. It adds a **Codex Ext** icon to VS Code's left Activity Bar
-and lets you view sessions belonging to the current workspace or every
-available local session.
+`Codex Ext` is a workspace-aware session manager for the official OpenAI Codex
+VS Code extension. It adds a dedicated **Codex Ext** icon to the left Activity
+Bar and keeps your local Codex conversations organized without replacing the
+official Codex editor.
 
 [中文说明](#中文说明) · [Report an issue](https://github.com/wzrzt/codex-ext/issues)
+
+## Highlights
+
+- **Workspace-aware sessions** — switch between the current workspace and all
+  local sessions. The selected scope also applies to archived sessions.
+- **Account & Usage** — show the signed-in account, plan, available Codex
+  allowance windows, and their reset times.
+- **Practical session management** — search, rename, group, archive, restore,
+  and drag conversations between groups or into Archived.
+- **No empty conversations** — **New session** opens an official Codex draft.
+  A real conversation is created only after the first message, then it is
+  automatically associated with the workspace that opened it.
+- **Native Codex experience** — clicking a session opens the official Codex
+  conversation editor; Codex Ext does not implement or proxy the chat UI.
+- **Localized sidebar** — English and Simplified Chinese follow VS Code's
+  display language.
 
 ## Install
 
@@ -42,6 +58,14 @@ the signed-in email, plan, one progress bar per available Codex allowance
 window, and its reset time. The **Session Manager** panel below has a tab-style
 **Workspace / All sessions** switch, a search field, and a new-session action.
 The session list follows directly below it and retains groups, archive, and restore. Account usage is not a conversation token estimate.
+
+## How it works
+
+Codex Ext reads session titles, workspace metadata, and archive state from
+local Codex data. Rename, archive, and restore operations are performed by the
+official Codex app-server, so the changes remain consistent with Codex itself.
+Session grouping and workspace bindings are stored locally in VS Code for each
+workspace. No Codex Ext cloud service receives your conversations.
 
 ## Usage
 

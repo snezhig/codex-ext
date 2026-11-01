@@ -2,6 +2,12 @@
 
 All notable changes to this project are documented in this file.
 
+## 0.6.10 — 2026-11-01
+
+- Updated the Marketplace description and README to reflect the current
+  workspace session manager, account usage, search, grouping, archive, and
+  official-draft behavior.
+
 ## 0.6.9 — 2026-10-30
 
 - Give each official Codex draft a unique URI fragment. New session now opens
