@@ -88,7 +88,9 @@ function renderAccountUsage(usage: CodexUsage | undefined, error: Error | undefi
     : '';
   const windows = usage?.windows.length
     ? usage.windows.map(renderUsageWindow).join('')
-    : `<p class="empty">${escapeHtml(error ? vscode.l10n.t('Usage unavailable') : vscode.l10n.t('Loading usage…'))}</p>`;
+    : error
+      ? `<p class="empty"><strong>${escapeHtml(vscode.l10n.t('Usage unavailable'))}</strong><br><small>${escapeHtml(error.message)}</small></p>`
+      : `<p class="empty">${escapeHtml(vscode.l10n.t('Loading usage…'))}</p>`;
   return `<section class="account-panel"><div class="section-heading">⌄ ${escapeHtml(vscode.l10n.t('ACCOUNT & USAGE'))}<button class="heading-action" data-command="refresh" title="${escapeHtml(vscode.l10n.t('Refresh'))}">↻</button></div><div class="minor-heading">${escapeHtml(vscode.l10n.t('ACCOUNT'))}</div>${account}<div class="minor-heading usage-heading">${escapeHtml(vscode.l10n.t('USAGE'))}</div>${windows}</section>`;
 }
 

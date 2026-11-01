@@ -2,7 +2,7 @@
   "name": "codex-ext",
   "displayName": "%displayName%",
   "description": "%description%",
-  "version": "0.6.11",
+  "version": "0.6.12",
   "publisher": "wzrzt",
   "license": "MIT",
   "repository": {

@@ -2,6 +2,13 @@
 
 All notable changes to this project are documented in this file.
 
+## 0.6.12 — 2026-11-01
+
+- Add a local ChatGPT Desktop Codex CLI fallback for Remote-SSH account usage
+  on macOS, even if the official VS Code extension is installed remotely.
+- Show the concrete Account & Usage failure in the sidebar, including a clear
+  instruction when Codex Ext was installed on the SSH host instead of locally.
+
 ## 0.6.11 — 2026-11-01
 
 - Fix Account & Usage for Remote SSH and Dev Containers by running Codex Ext

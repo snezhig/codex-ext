@@ -55,6 +55,8 @@
   "Codex app server is unavailable.": "Codex app server is unavailable.",
   "Codex request timed out: {0}": "Codex request timed out: {0}",
   "Codex app server exited unexpectedly.": "Codex app server exited unexpectedly.",
+  "Codex Ext is running on the remote host. Install Codex Ext locally, then reload this window.": "Codex Ext is running on the remote host. Install Codex Ext locally, then reload this window.",
+  "Unable to find a local Codex executable. Install OpenAI Codex or ChatGPT locally.": "Unable to find a local Codex executable. Install OpenAI Codex or ChatGPT locally.",
   "Codex request failed.": "Codex request failed.",
   "Restore Archived Session": "Restore Archived Session",
   "Create session group": "Create session group",

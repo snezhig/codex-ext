@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import { execFile as executeFile, spawn } from 'node:child_process';
-import { readFile, readdir } from 'node:fs/promises';
+import { access, readFile, readdir } from 'node:fs/promises';
+import { constants } from 'node:fs';
 import { homedir } from 'node:os';
 import { join } from 'node:path';
 import * as readline from 'node:readline';
@@ -51,6 +52,7 @@ export class CodexSessionClient {
 
   /** Reads the account allowance exposed by the official Codex app-server. */
   public async readUsage(): Promise<CodexUsage> {
+    this.assertLocalRuntime();
     const [limits, account] = await this.withCodexAppServer((request) => Promise.all([
       request('account/rateLimits/read', {}),
       request('account/read', {})
@@ -107,6 +109,7 @@ export class CodexSessionClient {
    * of writing undocumented local database files directly.
    */
   private async withCodexAppServer<T>(action: (request: AppServerRequest) => Promise<T>): Promise<T> {
+    this.assertLocalRuntime();
     const executable = await this.getCodexExecutable();
     const codexHome = this.getCodexHome();
 
@@ -220,13 +223,42 @@ export class CodexSessionClient {
 
   private async getCodexExecutable(): Promise<string> {
     const extension = vscode.extensions.getExtension('openai.chatgpt');
-    if (!extension) {
-      throw new Error(vscode.l10n.t('OpenAI Codex (openai.chatgpt) is required.'));
+    const candidates: string[] = [];
+    if (extension) {
+      await extension.activate();
+      const platform = process.platform === 'win32' ? 'windows' : process.platform === 'darwin' ? 'macos' : 'linux';
+      const architecture = process.arch === 'arm64' ? 'aarch64' : 'x86_64';
+      candidates.push(join(extension.extensionPath, 'bin', `${platform}-${architecture}`, process.platform === 'win32' ? 'codex.exe' : 'codex'));
     }
-    await extension.activate();
-    const platform = process.platform === 'win32' ? 'windows' : process.platform === 'darwin' ? 'macos' : 'linux';
-    const architecture = process.arch === 'arm64' ? 'aarch64' : 'x86_64';
-    return join(extension.extensionPath, 'bin', `${platform}-${architecture}`, process.platform === 'win32' ? 'codex.exe' : 'codex');
+
+    // A Remote-SSH window can have the official extension installed only on
+    // the server. Its extensionPath is then not executable from this local UI
+    // host. ChatGPT Desktop bundles the same local Codex CLI on macOS, which
+    // gives usage and account reads a reliable local fallback.
+    if (process.platform === 'darwin') {
+      candidates.push('/Applications/ChatGPT.app/Contents/Resources/codex-cli/CodexCLI.app/Contents/MacOS/codex');
+    }
+    for (const candidate of candidates) {
+      try {
+        await access(candidate, constants.X_OK);
+        return candidate;
+      } catch {
+        // Try the next local installation location.
+      }
+    }
+    throw new Error(vscode.l10n.t('Unable to find a local Codex executable. Install OpenAI Codex or ChatGPT locally.'));
+  }
+
+  /**
+   * The Codex login is intentionally read from the local machine. Starting
+   * an app-server on an SSH host cannot access the desktop account and yields
+   * an empty account/rate-limit response.
+   */
+  private assertLocalRuntime(): void {
+    const self = vscode.extensions.getExtension('wzrzt.codex-ext');
+    if (vscode.env.remoteName && self?.extensionKind === vscode.ExtensionKind.Workspace) {
+      throw new Error(vscode.l10n.t('Codex Ext is running on the remote host. Install Codex Ext locally, then reload this window.'));
+    }
   }
 
   private getCodexHome(): string {

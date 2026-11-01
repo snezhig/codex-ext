@@ -55,6 +55,8 @@
   "Codex app server is unavailable.": "Codex 应用服务不可用。",
   "Codex request timed out: {0}": "Codex 请求超时：{0}",
   "Codex app server exited unexpectedly.": "Codex 应用服务意外退出。",
+  "Codex Ext is running on the remote host. Install Codex Ext locally, then reload this window.": "Codex Ext 正运行在远端主机。请在本机安装 Codex Ext，然后重载此窗口。",
+  "Unable to find a local Codex executable. Install OpenAI Codex or ChatGPT locally.": "找不到本机 Codex 可执行程序。请在本机安装 OpenAI Codex 或 ChatGPT。",
   "Codex request failed.": "Codex 请求失败。",
   "Restore Archived Session": "恢复已归档会话",
   "Create session group": "新建会话分组",
