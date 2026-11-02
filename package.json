@@ -2,7 +2,7 @@
   "name": "codex-ext",
   "displayName": "%displayName%",
   "description": "%description%",
-  "version": "0.6.13",
+  "version": "0.6.14",
   "publisher": "wzrzt",
   "license": "MIT",
   "repository": {
@@ -27,7 +27,10 @@
   ],
   "main": "./out/extension.js",
   "extensionKind": [
-    "ui"
+    "workspace"
+  ],
+  "extensionPack": [
+    "wzrzt.codex-ext-local-bridge"
   ],
   "activationEvents": [
     "onStartupFinished",

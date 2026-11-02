@@ -1,0 +1,43 @@
+{
+  "name": "codex-ext-local-bridge",
+  "displayName": "Codex Ext Local Bridge",
+  "description": "Local account and usage bridge for Codex Ext.",
+  "version": "0.1.0",
+  "publisher": "wzrzt",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/wzrzt/codex-ext.git"
+  },
+  "engines": {
+    "vscode": "^1.96.2"
+  },
+  "main": "./out/extension.js",
+  "extensionKind": [
+    "ui"
+  ],
+  "api": "none",
+  "activationEvents": [
+    "onCommand:codexExt.localBridge.readUsage"
+  ],
+  "contributes": {
+    "commands": [
+      {
+        "command": "codexExt.localBridge.readUsage",
+        "title": "Codex Ext: Read Local Usage",
+        "enablement": "false"
+      }
+    ]
+  },
+  "scripts": {
+    "compile": "tsc -p ./",
+    "vscode:prepublish": "npm run compile",
+    "package": "vsce package --no-dependencies"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "@types/vscode": "^1.96.0",
+    "@vscode/vsce": "^4.1.0",
+    "typescript": "^5.7.2"
+  }
+}

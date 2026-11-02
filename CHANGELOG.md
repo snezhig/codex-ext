@@ -2,6 +2,13 @@
 
 All notable changes to this project are documented in this file.
 
+## 0.6.14 — 2026-11-03
+
+- Restore the main extension to the Remote-SSH workspace host, so it reads and
+  manages the SSH host's Codex sessions rather than macOS sessions.
+- Move account usage to a dedicated local bridge extension, allowing remote
+  sessions and local account usage to coexist.
+
 ## 0.6.13 — 2026-11-02
 
 - Remove the cross-host hard dependency on OpenAI Codex. Codex Ext can now

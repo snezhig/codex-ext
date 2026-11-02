@@ -1,5 +1,6 @@
 .vscode/**
 .github/**
+local-bridge/**
 src/**
 node_modules/**
 .gitignore

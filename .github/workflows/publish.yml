@@ -28,5 +28,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Build and publish
+      - name: Build and publish local usage bridge
+        working-directory: local-bridge
+        run: ../node_modules/.bin/vsce publish --oidc --skip-duplicate
+
+      - name: Build and publish Codex Ext
         run: npx @vscode/vsce publish --oidc --skip-duplicate

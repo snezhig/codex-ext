@@ -52,12 +52,16 @@ export class CodexSessionClient {
 
   /** Reads the account allowance exposed by the official Codex app-server. */
   public async readUsage(): Promise<CodexUsage> {
-    this.assertLocalRuntime();
-    const [limits, account] = await this.withCodexAppServer((request) => Promise.all([
-      request('account/rateLimits/read', {}),
-      request('account/read', {})
-    ]));
-    return parseUsage(limits, account);
+    try {
+      const usage = await vscode.commands.executeCommand<CodexUsage | undefined>('codexExt.localBridge.readUsage');
+      if (!usage) {
+        throw new Error(vscode.l10n.t('The local usage bridge returned no data.'));
+      }
+      return usage;
+    } catch (error) {
+      const detail = error instanceof Error ? error.message : String(error);
+      throw new Error(vscode.l10n.t('Local usage helper is unavailable. Update Codex Ext and install its Local Bridge: {0}', detail));
+    }
   }
 
   /** Opens a conversation in the leftmost existing editor group, never Beside. */
@@ -109,7 +113,6 @@ export class CodexSessionClient {
    * of writing undocumented local database files directly.
    */
   private async withCodexAppServer<T>(action: (request: AppServerRequest) => Promise<T>): Promise<T> {
-    this.assertLocalRuntime();
     const executable = await this.getCodexExecutable();
     const codexHome = this.getCodexHome();
 
@@ -247,18 +250,6 @@ export class CodexSessionClient {
       }
     }
     throw new Error(vscode.l10n.t('Unable to find a local Codex executable. Install OpenAI Codex or ChatGPT locally.'));
-  }
-
-  /**
-   * The Codex login is intentionally read from the local machine. Starting
-   * an app-server on an SSH host cannot access the desktop account and yields
-   * an empty account/rate-limit response.
-   */
-  private assertLocalRuntime(): void {
-    const self = vscode.extensions.getExtension('wzrzt.codex-ext');
-    if (vscode.env.remoteName && self?.extensionKind === vscode.ExtensionKind.Workspace) {
-      throw new Error(vscode.l10n.t('Codex Ext is running on the remote host. Install Codex Ext locally, then reload this window.'));
-    }
   }
 
   private getCodexHome(): string {

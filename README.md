@@ -45,15 +45,12 @@ code --install-extension wzrzt.codex-ext
 
 ### Remote SSH / Dev Containers
 
-Codex Ext intentionally runs on the **local VS Code UI host**, including when
-the folder is opened through Remote SSH or a Dev Container. This lets Account
-& Usage use the same local Codex sign-in and allowance as the official Codex
-extension, instead of looking for credentials on the remote machine.
-
-Codex Ext does not declare a hard VS Code extension dependency on OpenAI
-Codex: a hard dependency prevents a panel from loading when the two extensions
-are installed on opposite sides of a Remote-SSH connection. Native session
-actions instead check for OpenAI Codex only when they are used.
+When using Remote SSH or Dev Containers, Codex Ext runs with the workspace so
+the session list and session actions operate on that remote machine. Its
+automatically installed **Codex Ext Local Bridge** runs locally and reads the
+signed-in account and allowance from your local Codex installation. The two
+parts communicate through a VS Code command, so the remote session list and
+local account usage stay independent and correct.
 
 The extension opens sessions in the leftmost existing editor group through the
 official Codex conversation editor.
@@ -155,9 +152,10 @@ code --install-extension wzrzt.codex-ext
 
 ### Remote SSH / Dev Container
 
-即使通过 Remote SSH 或 Dev Container 打开项目，Codex Ext 也会运行在本机
-VS Code 的 UI 端，与官方 Codex 扩展使用同一份本机登录态和用量数据；不会在
-远端服务器上查找账户信息。
+通过 Remote SSH 或 Dev Container 打开项目时，主扩展会运行在远端工作区一侧，
+因此会话列表和会话管理针对远端机器。自动安装的 **Codex Ext Local Bridge**
+运行在本机，读取本机 Codex 的登录账户和用量；两者通过 VS Code 命令通信，
+因此远端会话与本机账户用量可以同时正确显示。
 
 - 按当前工作区或全部本地会话筛选；已归档会话也遵循该范围。
 - 显示官方 Codex 本地 app-server 返回的账户、套餐与可用额度。
