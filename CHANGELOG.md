@@ -2,6 +2,12 @@
 
 All notable changes to this project are documented in this file.
 
+## 0.6.13 — 2026-11-02
+
+- Remove the cross-host hard dependency on OpenAI Codex. Codex Ext can now
+  activate its sidebar in Remote-SSH even when the official extension runs in
+  a different extension host.
+
 ## 0.6.12 — 2026-11-01
 
 - Add a local ChatGPT Desktop Codex CLI fallback for Remote-SSH account usage

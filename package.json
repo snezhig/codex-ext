@@ -2,7 +2,7 @@
   "name": "codex-ext",
   "displayName": "%displayName%",
   "description": "%description%",
-  "version": "0.6.12",
+  "version": "0.6.13",
   "publisher": "wzrzt",
   "license": "MIT",
   "repository": {
@@ -46,9 +46,6 @@
     "onCommand:codexWorkspaceSessions.moveToGroup",
     "onCommand:codexWorkspaceSessions.renameGroup",
     "onCommand:codexWorkspaceSessions.deleteGroup"
-  ],
-  "extensionDependencies": [
-    "openai.chatgpt"
   ],
   "contributes": {
     "viewsContainers": {

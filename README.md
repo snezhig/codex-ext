@@ -41,7 +41,7 @@ code --install-extension wzrzt.codex-ext
 
 - VS Code 1.96 or newer
 - [OpenAI Codex](https://marketplace.visualstudio.com/items?itemName=openai.chatgpt)
-  (`openai.chatgpt`)
+  (`openai.chatgpt`) for opening and managing native Codex conversations.
 
 ### Remote SSH / Dev Containers
 
@@ -49,6 +49,11 @@ Codex Ext intentionally runs on the **local VS Code UI host**, including when
 the folder is opened through Remote SSH or a Dev Container. This lets Account
 & Usage use the same local Codex sign-in and allowance as the official Codex
 extension, instead of looking for credentials on the remote machine.
+
+Codex Ext does not declare a hard VS Code extension dependency on OpenAI
+Codex: a hard dependency prevents a panel from loading when the two extensions
+are installed on opposite sides of a Remote-SSH connection. Native session
+actions instead check for OpenAI Codex only when they are used.
 
 The extension opens sessions in the leftmost existing editor group through the
 official Codex conversation editor.
