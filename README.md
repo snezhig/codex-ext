@@ -2,7 +2,7 @@
 
 `Codex Ext` is a workspace-aware session manager for the official OpenAI Codex
 VS Code extension. It adds a dedicated **Codex Ext** icon to the left Activity
-Bar and keeps your local Codex conversations organized without replacing the
+Bar and keeps your Codex conversations organized without replacing the
 official Codex editor.
 
 [中文说明](#中文说明) · [Report an issue](https://github.com/wzrzt/codex-ext/issues)
@@ -10,7 +10,8 @@ official Codex editor.
 ## Highlights
 
 - **Workspace-aware sessions** — switch between the current workspace and all
-  local sessions. The selected scope also applies to archived sessions.
+  sessions on the current workspace host. The selected scope also applies to
+  archived sessions.
 - **Account & Usage** — show the signed-in account, plan, available Codex
   allowance windows, and their reset times.
 - **Practical session management** — search, rename, group, archive, restore,
@@ -70,9 +71,10 @@ The session list follows directly below it and retains groups, archive, and rest
 
 ## How it works
 
-Codex Ext reads session titles, workspace metadata, and archive state from
-local Codex data. Rename, archive, and restore operations are performed by the
-official Codex app-server, so the changes remain consistent with Codex itself.
+Codex Ext reads session titles, workspace metadata, and archive state from the
+Codex data on the current workspace host. Rename, archive, and restore
+operations are performed by the official Codex app-server, so the changes
+remain consistent with Codex itself.
 Session grouping and workspace bindings are stored locally in VS Code for each
 workspace. No Codex Ext cloud service receives your conversations.
 

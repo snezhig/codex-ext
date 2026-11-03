@@ -1,6 +1,6 @@
 {
   "displayName": "Codex Ext",
-  "description": "Workspace-aware Codex session manager with usage, search, groups, and archive.",
+  "description": "Remote-aware Codex session manager with local usage, search, groups, archive, and tab reload.",
   "activitybar.title": "Codex Ext",
   "view.title": "\u200b",
   "usage.view.title": "Account & Usage",

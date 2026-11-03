@@ -1,6 +1,6 @@
 {
   "displayName": "Codex Ext",
-  "description": "按工作区管理 Codex 会话，支持用量、搜索、分组和归档。",
+  "description": "支持远端会话、本机用量、搜索、分组、归档与标签页重载的 Codex 管理扩展。",
   "activitybar.title": "Codex Ext",
   "view.title": "\u200b",
   "usage.view.title": "账户与用量",

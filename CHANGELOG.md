@@ -2,6 +2,11 @@
 
 All notable changes to this project are documented in this file.
 
+## 0.6.16 — 2026-11-03
+
+- Refresh the Marketplace and GitHub introduction to describe Remote-SSH
+  session management, the local usage bridge, and per-tab reload support.
+
 ## 0.6.15 — 2026-11-03
 
 - Read SQLite sessions through portable hex-encoded rows instead of the
