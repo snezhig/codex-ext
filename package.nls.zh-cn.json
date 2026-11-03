@@ -13,6 +13,7 @@
   "command.search": "搜索会话",
   "command.clearSearch": "清除会话搜索",
   "command.refresh": "刷新会话",
+  "command.reloadCurrentTab": "重新加载当前 Codex 标签页",
   "command.newSession": "新建会话",
   "command.open": "打开会话",
   "command.rename": "重命名会话",

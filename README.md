@@ -99,6 +99,9 @@ workspace. No Codex Ext cloud service receives your conversations.
 9. **New session** opens an official Codex draft. It does not create a local
    conversation until you send the first message. After that, Codex Ext
    detects the real session and binds it to the workspace automatically.
+10. If an official Codex tab fails to initialize, right-click its tab and
+    choose **Reload Current Codex Tab**. This recreates only that editor tab;
+    unsent draft text in the tab is discarded.
 
 The extension follows VS Code's display language. English is the default and
 Simplified Chinese is provided when VS Code uses `zh-cn`.
@@ -163,6 +166,8 @@ code --install-extension wzrzt.codex-ext
   Archived。
 - 点击“新建会话”只会打开官方 Codex 草稿页；未发送消息便关闭时不会产生
   空白会话。首次发送消息后，扩展会自动识别真实会话并绑定到当前工作区。
+- 官方 Codex 标签页加载失败时，可右键标签页并选择“重新加载当前 Codex
+  标签页”。该操作只重建当前标签页，但会丢弃该标签页中尚未发送的草稿内容。
 - 会话标题、工作区信息与归档状态只从本机 Codex 数据中读取；扩展不提供或
   使用远端数据服务。
 

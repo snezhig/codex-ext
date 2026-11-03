@@ -13,6 +13,7 @@
   "command.search": "Search Sessions",
   "command.clearSearch": "Clear Session Search",
   "command.refresh": "Refresh Sessions",
+  "command.reloadCurrentTab": "Reload Current Codex Tab",
   "command.newSession": "New Session",
   "command.open": "Open Session",
   "command.rename": "Rename Session",

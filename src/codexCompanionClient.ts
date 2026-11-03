@@ -25,6 +25,39 @@ export class CodexSessionClient {
     await this.openInFirstEditorGroup(session.sessionId);
   }
 
+  /**
+   * Recreates a failed official Codex custom editor without reloading VS Code.
+   * The official editor keeps a webview instance per URI, so closing just the
+   * matching tab before reopening it clears a failed initial load.
+   */
+  public async reloadSessionTab(resource?: vscode.Uri): Promise<void> {
+    const uri = resource ?? this.getActiveCodexConversationUri();
+    if (!uri || uri.scheme !== 'openai-codex' || !uri.path.startsWith('/local/')) {
+      throw new Error(vscode.l10n.t('Select an open Codex conversation tab to reload it.'));
+    }
+    const extension = vscode.extensions.getExtension('openai.chatgpt');
+    if (!extension) {
+      throw new Error(vscode.l10n.t('OpenAI Codex (openai.chatgpt) is required.'));
+    }
+    await extension.activate();
+    const matchingTabs: vscode.Tab[] = [];
+    let viewColumn = vscode.ViewColumn.Active;
+    for (const group of vscode.window.tabGroups.all) {
+      for (const tab of group.tabs) {
+        if (tab.input instanceof vscode.TabInputCustom
+          && tab.input.viewType === 'chatgpt.conversationEditor'
+          && tab.input.uri.toString() === uri.toString()) {
+          matchingTabs.push(tab);
+          viewColumn = group.viewColumn;
+        }
+      }
+    }
+    if (matchingTabs.length > 0) {
+      await vscode.window.tabGroups.close(matchingTabs, true);
+    }
+    await this.openConversationUri(uri, viewColumn);
+  }
+
   /** Opens the official Codex new-conversation route in the first editor group. */
   public async createSession(): Promise<void> {
     const extension = vscode.extensions.getExtension('openai.chatgpt');
@@ -76,13 +109,29 @@ export class CodexSessionClient {
       authority: 'route',
       path: `/local/${sessionId}`
     });
+    await this.openConversationUri(uri, vscode.ViewColumn.One);
+  }
+
+  private async openConversationUri(uri: vscode.Uri, viewColumn: vscode.ViewColumn): Promise<void> {
     await vscode.commands.executeCommand('vscode.openWith', uri, 'chatgpt.conversationEditor', {
-      viewColumn: vscode.ViewColumn.One,
+      viewColumn,
       preview: false,
       preserveFocus: false
     });
   }
 
+  private getActiveCodexConversationUri(): vscode.Uri | undefined {
+    const input = vscode.window.tabGroups.activeTabGroup.activeTab?.input;
+    return input instanceof vscode.TabInputCustom && input.viewType === 'chatgpt.conversationEditor'
+      ? input.uri
+      : undefined;
+  }
+
+  /*
+   * Use the app-server bundled with OpenAI Codex for state-changing actions.
+   * It keeps archive and rename operations consistent with Codex itself instead
+   * of writing undocumented local database files directly.
+   */
   public async renameSession(session: CodexSession): Promise<void> {
     const title = await vscode.window.showInputBox({
       title: vscode.l10n.t('Rename Codex session'),
@@ -270,8 +319,12 @@ export class CodexSessionClient {
   private async readCodexStateSessions(codexHome: string): Promise<readonly CodexSession[] | undefined> {
     const databasePaths = [join(codexHome, 'state_5.sqlite'), join(codexHome, 'sqlite', 'state_5.sqlite')];
     const indexTitles = await this.readSessionIndexTitles(codexHome);
+    // Do not use sqlite3's newer `-json` output mode: it is absent on many
+    // Remote-SSH hosts. Hex-encode text columns so tabs, newlines and Unicode
+    // in a title cannot corrupt the portable tab-separated output.
     const query = [
-      'SELECT id AS sessionId, title, name, cwd, archived, recency_at_ms AS updatedAt',
+      'SELECT hex(id), hex(title), hex(name), hex(cwd),',
+      'CASE WHEN archived THEN 1 ELSE 0 END, COALESCE(recency_at_ms, 0)',
       'FROM threads',
       "WHERE COALESCE(thread_source, 'user') = 'user'",
       'ORDER BY recency_at_ms DESC, id DESC;'
@@ -281,28 +334,31 @@ export class CodexSessionClient {
       try {
         const { stdout } = await execFile('/usr/bin/sqlite3', [
           '-readonly',
-          '-json',
+          '-separator',
+          '\t',
           databasePath,
           query
         ], { maxBuffer: 8 * 1024 * 1024 });
-        const rows: unknown = JSON.parse(stdout);
-        if (!Array.isArray(rows)) {
-          continue;
-        }
-        return rows.flatMap((row): CodexSession[] => {
-          if (!isRecord(row) || typeof row.sessionId !== 'string' || typeof row.title !== 'string') {
+        return stdout.split(/\r?\n/).flatMap((line): CodexSession[] => {
+          if (!line) {
             return [];
           }
+          const [idHex, titleHex, nameHex, cwdHex, archived, updatedAt] = line.split('\t');
+          const sessionId = decodeSqliteHex(idHex);
+          const title = decodeSqliteHex(titleHex);
+          if (!sessionId || !title) {
+            return [];
+          }
+          const name = decodeSqliteHex(nameHex);
+          const cwd = decodeSqliteHex(cwdHex);
           return [{
-            sessionId: row.sessionId,
+            sessionId,
             // Codex's sidebar stores its edited/display title in the compact
             // index, while `name` is the explicit title set through Codex.
-            title: typeof row.name === 'string' && row.name.trim()
-              ? row.name
-              : indexTitles.get(row.sessionId) ?? row.title,
-            updatedAt: parseEpochMilliseconds(row.updatedAt),
-            archived: row.archived === 1,
-            workspacePaths: typeof row.cwd === 'string' ? [row.cwd] : []
+            title: name?.trim() || indexTitles.get(sessionId) || title,
+            updatedAt: parseEpochMilliseconds(Number(updatedAt)),
+            archived: archived === '1',
+            workspacePaths: cwd ? [cwd] : []
           }];
         });
       } catch {
@@ -318,7 +374,7 @@ export class CodexSessionClient {
       const latest = new Map<string, IndexedSession>();
       for (const line of contents.split(/\r?\n/)) {
         const item = parseIndexLine(line);
-        if (!item) {
+        if (!item || isGuardianReview(item.title)) {
           continue;
         }
         const previous = latest.get(item.sessionId);
@@ -346,7 +402,10 @@ export class CodexSessionClient {
     const latest = new Map<string, IndexedSession>();
     for (const line of contents.split(/\r?\n/)) {
       const item = parseIndexLine(line);
-      if (!item) {
+      // JSONL lacks the thread-source field. Keep this defensive filter for
+      // hosts without sqlite3, where otherwise internal Guardian reviews leak
+      // into the user session list.
+      if (!item || isGuardianReview(item.title)) {
         continue;
       }
       const previous = latest.get(item.sessionId);
@@ -461,6 +520,17 @@ function parseIndexLine(line: string): IndexedSession | undefined {
 
 function parseEpochMilliseconds(value: unknown): number | undefined {
   return typeof value === 'number' && Number.isFinite(value) && value > 0 ? value : undefined;
+}
+
+function decodeSqliteHex(value: string | undefined): string | undefined {
+  if (!value || value.length % 2 !== 0 || !/^[\da-f]+$/i.test(value)) {
+    return undefined;
+  }
+  return Buffer.from(value, 'hex').toString('utf8');
+}
+
+function isGuardianReview(title: string): boolean {
+  return title.trim().toLocaleLowerCase() === 'guardian review';
 }
 
 function parseSessionMetadata(contents: string): { sessionId: string; workspacePaths: readonly string[] } | undefined {

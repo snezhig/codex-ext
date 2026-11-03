@@ -2,7 +2,7 @@
   "name": "codex-ext",
   "displayName": "%displayName%",
   "description": "%description%",
-  "version": "0.6.14",
+  "version": "0.6.15",
   "publisher": "wzrzt",
   "license": "MIT",
   "repository": {
@@ -40,6 +40,7 @@
     "onCommand:codexWorkspaceSessions.searchSessions",
     "onCommand:codexWorkspaceSessions.clearSearch",
     "onCommand:codexWorkspaceSessions.refreshSessions",
+    "onCommand:codexWorkspaceSessions.reloadCurrentTab",
     "onCommand:codexWorkspaceSessions.newSession",
     "onCommand:codexWorkspaceSessions.openSession",
     "onCommand:codexWorkspaceSessions.renameSession",
@@ -109,6 +110,12 @@
       {
         "command": "codexWorkspaceSessions.refreshSessions",
         "title": "%command.refresh%",
+        "category": "%command.category%",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "codexWorkspaceSessions.reloadCurrentTab",
+        "title": "%command.reloadCurrentTab%",
         "category": "%command.category%",
         "icon": "$(refresh)"
       },
@@ -208,6 +215,17 @@
         {
           "command": "codexWorkspaceSessions.openSession",
           "when": "false"
+        },
+        {
+          "command": "codexWorkspaceSessions.reloadCurrentTab",
+          "when": "resourceScheme == openai-codex"
+        }
+      ],
+      "editor/title/context": [
+        {
+          "command": "codexWorkspaceSessions.reloadCurrentTab",
+          "when": "resourceScheme == openai-codex",
+          "group": "1_codex-ext"
         }
       ],
       "view/item/context": [

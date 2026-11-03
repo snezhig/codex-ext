@@ -145,6 +145,7 @@ export function activate(context: vscode.ExtensionContext): void {
     vscode.commands.registerCommand('codexWorkspaceSessions.showAllSessions', () => setShowAll(true)),
     vscode.commands.registerCommand('codexWorkspaceSessions.showWorkspaceSessions', () => setShowAll(false)),
     vscode.commands.registerCommand('codexWorkspaceSessions.refreshSessions', refresh),
+    vscode.commands.registerCommand('codexWorkspaceSessions.reloadCurrentTab', (resource?: vscode.Uri) => sessions.reloadSessionTab(resource)),
     vscode.commands.registerCommand('codexWorkspaceSessions.newSession', async () => {
       try {
         await drafts.createDraft();

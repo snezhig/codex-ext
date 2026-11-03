@@ -2,6 +2,15 @@
 
 All notable changes to this project are documented in this file.
 
+## 0.6.15 — 2026-11-03
+
+- Read SQLite sessions through portable hex-encoded rows instead of the
+  version-specific `sqlite3 -json` option; internal Guardian review sessions
+  no longer appear when SQLite is available.
+- Filter Guardian reviews from the JSONL fallback as a defensive measure.
+- Add **Reload Current Codex Tab** to the open Codex tab's right-click menu,
+  allowing a failed official editor to be recreated without reloading VS Code.
+
 ## 0.6.14 — 2026-11-03
 
 - Restore the main extension to the Remote-SSH workspace host, so it reads and
