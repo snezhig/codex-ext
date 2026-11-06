@@ -25,5 +25,10 @@
   "command.deleteGroup": "Remove Group",
   "configuration.title": "Codex Ext",
   "configuration.showAll.description": "Show all Codex sessions instead of only sessions bound to the current workspace.",
-  "configuration.codexHome.description": "Optional Codex data directory. Leave empty to use CODEX_HOME or ~/.codex."
+  "configuration.codexHome.description": "Optional Codex data directory. Leave empty to use CODEX_HOME or ~/.codex.",
+  "command.newSessionInGroup": "New Chat in This Editor Group",
+  "configuration.chatGroupLocking.description": "Route new file opens outside matching chat groups. Automatically release managed locks when a group no longer matches or this setting is off. Groups adopted by the policy are managed as a whole; other group locks are left unchanged.",
+  "configuration.chatGroupLocking.off": "Do not automatically lock editor groups.",
+  "configuration.chatGroupLocking.chatOnly": "Lock groups containing only Codex chat tabs.",
+  "configuration.chatGroupLocking.containsChat": "Lock any group containing a Codex chat, including groups with code tabs."
 }

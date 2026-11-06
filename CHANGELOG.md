@@ -2,6 +2,20 @@
 
 All notable changes to this project are documented in this file.
 
+## Unreleased
+
+- Reveal already-open Codex chats in their current editor group. Other chats
+  and drafts open in the group active when the action was invoked.
+- Add a Codex editor-title action to create a new chat in that group.
+- Add `codexWorkspaceSessions.chatGroupLocking` with `off`, `chatOnly` (default),
+  and `containsChat` modes to route new files outside matching chat groups.
+  Target locks by group resource and release managed locks when the group no
+  longer matches or the setting is disabled.
+- Add a per-tab reload action, including for drafts. Open a fresh editor in the
+  original group before closing the old tab, retain the original on failed open
+  or refused close, and serialize rapid reloads. Session selection reuses the
+  existing tab after reload.
+
 ## 0.6.16 — 2026-11-03
 
 - Refresh the Marketplace and GitHub introduction to describe Remote-SSH

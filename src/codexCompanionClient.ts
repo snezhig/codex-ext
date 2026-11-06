@@ -7,6 +7,7 @@ import { join } from 'node:path';
 import * as readline from 'node:readline';
 import { promisify } from 'node:util';
 import { CodexSession, CodexUsage, CodexUsageWindow } from './types';
+import { ConversationEditorGroups } from './conversationEditorGroups';
 
 const execFile = promisify(executeFile);
 
@@ -14,52 +15,85 @@ const execFile = promisify(executeFile);
  * Owns the integration with the official Codex extension and its local state.
  * This extension intentionally has no dependency on codex-companion.
  */
-export class CodexSessionClient {
+export class CodexSessionClient implements vscode.Disposable {
+  private readonly editors = new ConversationEditorGroups();
+  private reloads: Promise<void> = Promise.resolve();
+
+  public constructor() {
+    this.editors.initialize();
+  }
+
+  public dispose(): void {
+    this.editors.dispose();
+  }
+
   public async listSessions(): Promise<readonly CodexSession[]> {
     const codexHome = this.getCodexHome();
     const stateSessions = await this.readCodexStateSessions(codexHome);
     return stateSessions ?? this.readLocalSessionIndex(codexHome);
   }
 
-  public async openSession(session: CodexSession): Promise<void> {
-    await this.openInFirstEditorGroup(session.sessionId);
+  public async openSession(session: CodexSession, group = vscode.window.tabGroups.activeTabGroup): Promise<void> {
+    await this.openConversation(session.sessionId, group);
   }
 
   /**
    * Recreates a failed official Codex custom editor without reloading VS Code.
-   * The official editor keeps a webview instance per URI, so closing just the
-   * matching tab before reopening it clears a failed initial load.
+   * Open a fresh URI identity before closing the old tab, keeping its group
+   * alive and avoiding reuse of the failed custom document/webview instance.
    */
   public async reloadSessionTab(resource?: vscode.Uri): Promise<void> {
     const uri = resource ?? this.getActiveCodexConversationUri();
-    if (!uri || uri.scheme !== 'openai-codex' || !uri.path.startsWith('/local/')) {
+    if (!uri || uri.scheme !== 'openai-codex'
+      || (!uri.path.startsWith('/local/') && uri.path !== '/extension/panel/new')) {
       throw new Error(vscode.l10n.t('Select an open Codex conversation tab to reload it.'));
     }
+    const result = this.reloads.then(() => this.replaceSessionTab(uri));
+    this.reloads = result.catch(() => undefined);
+    return result;
+  }
+
+  private async replaceSessionTab(uri: vscode.Uri): Promise<void> {
     const extension = vscode.extensions.getExtension('openai.chatgpt');
     if (!extension) {
       throw new Error(vscode.l10n.t('OpenAI Codex (openai.chatgpt) is required.'));
     }
     await extension.activate();
     const matchingTabs: vscode.Tab[] = [];
-    let viewColumn = vscode.ViewColumn.Active;
+    let originalGroup: vscode.TabGroup | undefined;
     for (const group of vscode.window.tabGroups.all) {
       for (const tab of group.tabs) {
         if (tab.input instanceof vscode.TabInputCustom
           && tab.input.viewType === 'chatgpt.conversationEditor'
           && tab.input.uri.toString() === uri.toString()) {
           matchingTabs.push(tab);
-          viewColumn = group.viewColumn;
+          originalGroup = group;
         }
       }
     }
-    if (matchingTabs.length > 0) {
-      await vscode.window.tabGroups.close(matchingTabs, true);
+    if (matchingTabs.length === 0 || !originalGroup) {
+      // A previous queued reload may already have replaced this exact tab.
+      return;
     }
-    await this.openConversationUri(uri, viewColumn);
+    // The official route parser ignores fragments. Use one as a fresh editor
+    // identity, just as for independent drafts, without changing the thread.
+    const replacement = uri.with({ fragment: `codex-ext-reload-${randomUUID()}` });
+    await this.editors.openFresh(replacement, originalGroup);
+    const closed = await vscode.window.tabGroups.close(matchingTabs, true);
+    if (!closed) {
+      // Respect a refused close and roll back only the replacement we created.
+      const replacementTabs = vscode.window.tabGroups.all.flatMap((group) => group.tabs)
+        .filter((tab) => tab.input instanceof vscode.TabInputCustom
+          && tab.input.uri.toString() === replacement.toString());
+      if (replacementTabs.length > 0) {
+        await vscode.window.tabGroups.close(replacementTabs, true);
+      }
+      await this.editors.open(uri, originalGroup);
+    }
   }
 
-  /** Opens the official Codex new-conversation route in the first editor group. */
-  public async createSession(): Promise<void> {
+  /** Opens an independent official Codex draft in the requested editor group. */
+  public async createSession(group = vscode.window.tabGroups.activeTabGroup): Promise<void> {
     const extension = vscode.extensions.getExtension('openai.chatgpt');
     if (!extension) {
       throw new Error(vscode.l10n.t('OpenAI Codex (openai.chatgpt) is required.'));
@@ -76,11 +110,7 @@ export class CodexSessionClient {
       path: '/extension/panel/new',
       fragment: `codex-ext-draft-${randomUUID()}`
     });
-    await vscode.commands.executeCommand('vscode.openWith', uri, 'chatgpt.conversationEditor', {
-      viewColumn: vscode.ViewColumn.Active,
-      preview: false,
-      preserveFocus: false
-    });
+    await this.editors.open(uri, group);
   }
 
   /** Reads the account allowance exposed by the official Codex app-server. */
@@ -97,8 +127,8 @@ export class CodexSessionClient {
     }
   }
 
-  /** Opens a conversation in the leftmost existing editor group, never Beside. */
-  private async openInFirstEditorGroup(sessionId: string): Promise<void> {
+  /** Reveals an existing tab in place, or opens it in the requested group. */
+  private async openConversation(sessionId: string, group: vscode.TabGroup): Promise<void> {
     const extension = vscode.extensions.getExtension('openai.chatgpt');
     if (!extension) {
       throw new Error(vscode.l10n.t('OpenAI Codex (openai.chatgpt) is required.'));
@@ -109,15 +139,7 @@ export class CodexSessionClient {
       authority: 'route',
       path: `/local/${sessionId}`
     });
-    await this.openConversationUri(uri, vscode.ViewColumn.One);
-  }
-
-  private async openConversationUri(uri: vscode.Uri, viewColumn: vscode.ViewColumn): Promise<void> {
-    await vscode.commands.executeCommand('vscode.openWith', uri, 'chatgpt.conversationEditor', {
-      viewColumn,
-      preview: false,
-      preserveFocus: false
-    });
+    await this.editors.open(uri, group);
   }
 
   private getActiveCodexConversationUri(): vscode.Uri | undefined {

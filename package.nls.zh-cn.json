@@ -25,5 +25,10 @@
   "command.deleteGroup": "移除分组",
   "configuration.title": "Codex Ext",
   "configuration.showAll.description": "显示所有 Codex 会话，而非仅显示已绑定到当前工作区的会话。",
-  "configuration.codexHome.description": "可选的 Codex 数据目录。留空则使用 CODEX_HOME 或 ~/.codex。"
+  "configuration.codexHome.description": "可选的 Codex 数据目录。留空则使用 CODEX_HOME 或 ~/.codex。",
+  "command.newSessionInGroup": "在此编辑器组中新建会话",
+  "configuration.chatGroupLocking.description": "将新打开的文件放在符合条件的会话组之外。当组不再符合条件或关闭此设置时，自动解除托管锁定。策略接管的组整体受管理，其他组的锁定保持不变。",
+  "configuration.chatGroupLocking.off": "不自动锁定编辑器组。",
+  "configuration.chatGroupLocking.chatOnly": "仅锁定全部为 Codex 会话标签页的组。",
+  "configuration.chatGroupLocking.containsChat": "锁定包含 Codex 会话的任何组，包括同时含有代码标签页的组。"
 }

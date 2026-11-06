@@ -2,6 +2,7 @@
 .github/**
 local-bridge/**
 src/**
+test/**
 node_modules/**
 .gitignore
 .git/**

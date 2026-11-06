@@ -15,7 +15,7 @@ interface PendingDraft {
 
 export interface DraftSessionTrackerOptions {
   readonly listSessions: () => Promise<readonly CodexSession[]>;
-  readonly openDraft: () => Promise<void>;
+  readonly openDraft: (group: vscode.TabGroup) => Promise<void>;
   readonly currentWorkspaceHash: () => string | undefined;
   readonly currentWorkspacePaths: () => readonly string[];
   readonly onSessionConfirmed: (session: CodexSession, workspaceHash: string) => Promise<void>;
@@ -36,7 +36,9 @@ export class DraftSessionTracker implements vscode.Disposable {
 
   public constructor(private readonly options: DraftSessionTrackerOptions) {}
 
-  public async createDraft(): Promise<void> {
+  public async createDraft(group = vscode.window.tabGroups.activeTabGroup): Promise<void> {
+    // Capture the invoking editor group before reading session history. Both
+    // sidebar and editor-title actions must keep their original destination.
     // Capture the snapshot before opening the official editor. A thread that
     // appears after this point is eligible only if it also belongs to this
     // exact workspace, so unrelated existing conversations are never claimed.
@@ -51,7 +53,7 @@ export class DraftSessionTracker implements vscode.Disposable {
     this.ensurePolling();
 
     try {
-      await this.options.openDraft();
+      await this.options.openDraft(group);
     } catch (error) {
       const index = this.drafts.indexOf(draft);
       if (index >= 0) {

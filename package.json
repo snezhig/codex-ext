@@ -49,7 +49,8 @@
     "onCommand:codexWorkspaceSessions.createGroup",
     "onCommand:codexWorkspaceSessions.moveToGroup",
     "onCommand:codexWorkspaceSessions.renameGroup",
-    "onCommand:codexWorkspaceSessions.deleteGroup"
+    "onCommand:codexWorkspaceSessions.deleteGroup",
+    "onCommand:codexWorkspaceSessions.newSessionInGroup"
   ],
   "contributes": {
     "viewsContainers": {
@@ -124,6 +125,15 @@
         "title": "%command.newSession%",
         "category": "%command.category%",
         "icon": "$(add)"
+      },
+      {
+        "command": "codexWorkspaceSessions.newSessionInGroup",
+        "title": "%command.newSessionInGroup%",
+        "category": "%command.category%",
+        "icon": {
+          "light": "media/codex-blossom-light.svg",
+          "dark": "media/codex-blossom.svg"
+        }
       },
       {
         "command": "codexWorkspaceSessions.openSession",
@@ -259,6 +269,17 @@
           "when": "view == codexWorkspaceSessions.activity && viewItem == codexWorkspaceSessions.customGroup",
           "group": "inline@2"
         }
+      ],
+      "editor/title": [
+        {
+          "command": "codexWorkspaceSessions.newSessionInGroup",
+          "group": "navigation@0"
+        },
+        {
+          "command": "codexWorkspaceSessions.reloadCurrentTab",
+          "when": "resourceScheme == openai-codex",
+          "group": "navigation@2"
+        }
       ]
     },
     "configuration": {
@@ -275,11 +296,28 @@
           "default": "",
           "scope": "window",
           "description": "%configuration.codexHome.description%"
+        },
+        "codexWorkspaceSessions.chatGroupLocking": {
+          "type": "string",
+          "enum": [
+            "off",
+            "chatOnly",
+            "containsChat"
+          ],
+          "enumDescriptions": [
+            "%configuration.chatGroupLocking.off%",
+            "%configuration.chatGroupLocking.chatOnly%",
+            "%configuration.chatGroupLocking.containsChat%"
+          ],
+          "default": "chatOnly",
+          "scope": "window",
+          "description": "%configuration.chatGroupLocking.description%"
         }
       }
     }
   },
   "scripts": {
+    "test": "npm run compile && node --test test/*.test.cjs",
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
     "vscode:prepublish": "npm run compile",

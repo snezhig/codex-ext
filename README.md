@@ -53,8 +53,32 @@ signed-in account and allowance from your local Codex installation. The two
 parts communicate through a VS Code command, so the remote session list and
 local account usage stay independent and correct.
 
-The extension opens sessions in the leftmost existing editor group through the
-official Codex conversation editor.
+The extension opens sessions through the official Codex conversation editor.
+Selecting an already-open chat reveals it in its existing editor group, even
+after you move it to another split. Other chats and drafts open in the editor
+group active when you click the sidebar action. The Codex icon in each editor
+group's title bar creates a fresh chat tab in that group. No split is forced.
+
+`codexWorkspaceSessions.chatGroupLocking` controls file routing independently:
+
+- `off`: do not automatically lock groups.
+- `chatOnly` (default): lock groups containing only Codex chat tabs.
+- `containsChat`: lock any group containing a Codex chat, including mixed groups.
+
+VS Code opens new files outside a locked group, using the most recently used
+unlocked group or creating one if none is available. Locking does not relocate
+existing file tabs. The policy manages matching chat groups on activation,
+group focus, tab opens/closes, and setting changes. Automatic locks are released
+when a managed group no longer matches the policy, including inactive groups
+that have lost their last chat, or when you select `off`. Groups the extension
+has not managed are left alone.
+
+Lock/unlock commands target a resource unique to that group instead of relying
+on current focus. Empty groups or groups with only resources duplicated in
+other splits cannot be targeted safely; their lock update is deferred until a
+unique resource is available. VS Code's public tab API does not expose manual
+lock state, so groups adopted by this policy are managed as a whole; use `off`
+for manual control.
 
 It reads Codex Desktop's local thread state to retain the same user-facing
 titles, workspace associations, and archive state as Codex. If that state is
@@ -77,6 +101,17 @@ operations are performed by the official Codex app-server, so the changes
 remain consistent with Codex itself.
 Session grouping and workspace bindings are stored locally in VS Code for each
 workspace. No Codex Ext cloud service receives your conversations.
+
+## Failed-tab recovery
+
+The **Reload Current Codex Tab** arrow is also available in the title bar of a
+Codex editor, including drafts. It opens a fresh editor instance in the same
+group before closing the old tab, keeping the group alive even when it contains
+only that chat. A refused close rolls back the replacement and keeps the
+original. Reloading can discard unsent text. Reloading a `/new` draft reopens
+that draft route; use the existing session list to return to a conversation
+saved from a draft. Reloading does not fix an underlying official Codex UI
+startup failure.
 
 ## Usage
 

@@ -3,6 +3,7 @@ import { CodexSessionClient } from './codexCompanionClient';
 import { DraftSessionTracker } from './draftSessionTracker';
 import { SessionManagerAction, SessionControlsWebviewProvider } from './sessionControlsWebviewProvider';
 import { WorkspaceBindingStore } from './workspaceBindingStore';
+import { editorGroupForResource } from './conversationEditorGroups';
 
 const CONFIGURATION_SECTION = 'codexWorkspaceSessions';
 const SHOW_ALL_SETTING = 'showAllSessions';
@@ -26,7 +27,7 @@ export function activate(context: vscode.ExtensionContext): void {
 
   const drafts = new DraftSessionTracker({
     listSessions: () => sessions.listSessions(),
-    openDraft: () => sessions.createSession(),
+    openDraft: (group) => sessions.createSession(group),
     currentWorkspaceHash: () => bindings.getCurrentWorkspaceHash(),
     currentWorkspacePaths: () => bindings.getCurrentWorkspacePaths(),
     onSessionConfirmed: (session, workspaceHash) => {
@@ -139,6 +140,7 @@ export function activate(context: vscode.ExtensionContext): void {
   context.subscriptions.push(
     vscode.window.registerWebviewViewProvider('codexWorkspaceSessions.controls', manager),
     manager.onDidRequestAction(runAction),
+    sessions,
     drafts,
     vscode.commands.registerCommand('codexWorkspaceSessions.focus', () => vscode.commands.executeCommand('codexWorkspaceSessions.controls.focus')),
     vscode.commands.registerCommand('codexWorkspaceSessions.toggleSessionScope', () => setShowAll(!getShowAll())),
@@ -146,14 +148,14 @@ export function activate(context: vscode.ExtensionContext): void {
     vscode.commands.registerCommand('codexWorkspaceSessions.showWorkspaceSessions', () => setShowAll(false)),
     vscode.commands.registerCommand('codexWorkspaceSessions.refreshSessions', refresh),
     vscode.commands.registerCommand('codexWorkspaceSessions.reloadCurrentTab', (resource?: vscode.Uri) => sessions.reloadSessionTab(resource)),
-    vscode.commands.registerCommand('codexWorkspaceSessions.newSession', async () => {
+    ...['codexWorkspaceSessions.newSession', 'codexWorkspaceSessions.newSessionInGroup'].map((command) => vscode.commands.registerCommand(command, async (resource?: vscode.Uri) => {
       try {
-        await drafts.createDraft();
+        await drafts.createDraft(editorGroupForResource(resource));
       } catch (error) {
         const detail = error instanceof Error ? error.message : String(error);
         void vscode.window.showErrorMessage(vscode.l10n.t('Codex Ext: {0}', detail));
       }
-    }),
+    })),
     vscode.commands.registerCommand('codexWorkspaceSessions.searchSessions', async () => {
       const value = await vscode.window.showInputBox({ title: vscode.l10n.t('Search Codex Ext'), prompt: vscode.l10n.t('Filter session titles. Leave empty to clear the filter.'), value: manager.getQuery() });
       if (value !== undefined) { manager.setQuery(value); await updateContexts(); }
